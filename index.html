@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>सर्व्हे डाटा एन्ट्री सॉफ्टवेअर (Mobile Friendly)</title>
+    <!-- Bootstrap CSS for nice styling on mobile -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SheetJS for Excel Download -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding-bottom: 50px; }
+        .form-container { background: #ffffff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px; }
+        .form-label { font-weight: 600; color: #333; margin-top: 10px; font-size: 14px; }
+        .btn-custom { background-color: #2ca58d; color: white; font-weight: bold; }
+        .btn-custom:hover { background-color: #238471; color: white; }
+        .btn-excel { background-color: #107c41; color: white; font-weight: bold; }
+        .btn-excel:hover { background-color: #0b592e; color: white; }
+        .table-responsive { margin-top: 30px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { color: #2ca58d; font-weight: bold; }
+        .section-title { background: #e8f5e9; padding: 8px 12px; border-left: 5px solid #2ca58d; margin-top: 20px; font-weight: bold; color: #1b5e20; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="text-center mt-4">
+                <h2>📋 सर्व्हे डाटा एन्ट्री ऑनलाईन सॉफ्टवेअर</h2>
+                <p class="text-muted">हे सॉफ्टवेअर मोबाईलवर उत्तम काम करते. माहिती भरा आणि शेवटी एक्सेल फाईल डाउनलोड करा.</p>
+            </div>
+
+            <!-- Form Container -->
+            <div class="form-container">
+                <form id="surveyForm">
+                    <div class="row">
+                        <!-- Section 1 -->
+                        <div class="section-title">मूलभूत माहिती (Basic Info)</div>
+                        
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">ओळ क्र. (Serial No.)</label>
+                            <input type="number" id="col_1" class="form-control" placeholder="उदा. 1" required>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">इमारत क्र.</label>
+                            <input type="text" id="col_2" class="form-control" placeholder="उदा. 1">
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">गणना घर क्र.</label>
+                            <input type="text" id="col_3" class="form-control" placeholder="उदा. 1">
+                        </div>
+
+                        <!-- Section 2 -->
+                        <div class="section-title">घर आणि इमारतीचे साहित्य</div>
+                        
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">४- जमिनीसाठी मुख्यत: वापरलेले साहित्य</label>
+                            <select id="col_4" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="१- माती">१- माती</option>
+                                <option value="२- लाकूड/बांबू">२- लाकूड/बांबू</option>
+                                <option value="३-पक्क्या विटा">३-पक्क्या विटा</option>
+                                <option value="४-दगड">४-दगड</option>
+                                <option value="५-सीमेंट">५-सीमेंट</option>
+                                <option value="६-मोझक/टाईल्स">६-मोझक/टाईल्स</option>
+                                <option value="७-इतर">७-इतर</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">५- भिंतीसाठी मुख्यत: वापरलेले साहित्य</label>
+                            <select id="col_5" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="१- गवत/वळवलेले गवत/बांबू इ.">१- गवत/वळवलेले गवत/बांबू इ.</option>
+                                <option value="२- प्लॅस्टिक/पॉलिथिन">२- प्लॅस्टिक/पॉलिथिन</option>
+                                <option value="३- माती/ कच्च्या विटा">३- माती/ कच्च्या विटा</option>
+                                <option value="४- लाकूड">४- लाकूड</option>
+                                <option value="५- दगड सीमेंट/ मातीने न जोडलेले">५- दगड सीमेंट/ मातीने न जोडलेले</option>
+                                <option value="६-दगड सीमेंट/ मातीने जोडलेले">६-दगड सीमेंट/ मातीने जोडलेले</option>
+                                <option value="७- जी. आय./ धातू/असबेसटॉस शीट">७- जी. आय./ धातू/असबेसटॉस शीट</option>
+                                <option value="८- पक्क्या विटा">८- पक्क्या विटा</option>
+                                <option value="९- कॉंनक्रीट">९- कॉंनक्रीट</option>
+                                <option value="०- इतर">०- इतर</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">६- छप्परासाठी मुख्यत: वापरलेले साहित्य</label>
+                            <select id="col_6" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="१- गवत/वळवलेले गवत/बांबू इ.">१- गवत/वळवलेले गवत/बांबू इ.</option>
+                                <option value="२- प्लॅस्टिक/पॉलिथिन">२- प्लॅस्टिक/पॉलिथिन</option>
+                                <option value="३- हातानी बनविलेले कौले">३- हातानी बनविलेले कौले</option>
+                                <option value="४- यंत्रांनी बनविलेले कौले">४- यंत्रांनी बनविलेले कौले</option>
+                                <option value="५- पक्क्या विटा">५- पक्क्या विटा</option>
+                                <option value="६-दगड">६-दगड</option>
+                                <option value="७-स्लेट">७-स्लेट</option>
+                                <option value="८ - जी. आय./ धातू/असबेसटॉस शीट">८ - जी. आय./ धातू/असबेसटॉस शीट</option>
+                                <option value="९- कॉंनक्रीट">९- कॉंनक्रीट</option>
+                                <option value="०- इतर">०- इतर</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">७. गणना घरच्या वापरासंबंधी खात्री करा</label>
+                            <select id="col_7" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="१- निवास">१- निवास</option>
+                                <option value="२- निवासासह इतर वापर">२- निवासासह इतर वापर</option>
+                                <option value="३- दुकान/ कार्यालय">३- दुकान/ कार्यालय</option>
+                                <option value="४- शाळा/ महाविद्यालय इ.">४- शाळा/ महाविद्यालय इ.</option>
+                                <option value="५- हॉटल/ लॉज/ गेस्ट हाऊस इ.">५- हॉटल/ लॉज/ गेस्ट हाऊस इ.</option>
+                                <option value="६- रुग्णालय/दवाखाना इ.">६- रुग्णालय/दवाखाना इ.</option>
+                                <option value="७- कारखाना/ वर्कशॉप / वर्कशेड इ.">७- कारखाना/ वर्कशॉप / वर्कशेड इ.</option>
+                                <option value="८- प्रार्थना स्थळ">८- प्रार्थना स्थळ</option>
+                                <option value="९- इतर निवासाव्यतिरिक्त वापर">९- इतर निवासाव्यतिरिक्त वापर</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">८- गणना घराची स्थिती</label>
+                            <select id="col_8" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="१- चांगली">१- चांगली</option>
+                                <option value="२- राहण्यास योग्य">२- राहण्यास योग्य</option>
+                                <option value="३- मोडकळीस आलेले">३- मोडकळीस आलेले</option>
+                            </select>
+                        </div>
+
+                        <!-- Section 3 -->
+                        <div class="section-title">कुटुंबाची माहिती (Family Info)</div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">९- कुटुंब क्रमांक</label>
+                            <input type="text" id="col_9" class="form-control" placeholder="उदा. 1">
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">१०- एकूण व्यक्तींची संख्या</label>
+                            <input type="number" id="col_10" class="form-control" placeholder="उदा. 4">
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">११- कुटुंब प्रमुखाचे नाव</label>
+                            <input type="text" id="col_11" class="form-control" placeholder="नाव लिहा">
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">१२ - कुटुंब प्रमुखाचे लिंग</label>
+                            <select id="col_12" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="१- पुरुष">१- पुरुष</option>
+                                <option value="२- स्त्री">२- स्त्री</option>
+                                <option value="३- ट्रान्सजेंडर व्यक्ती">३- ट्रान्सजेंडर व्यक्ती</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">१३ . प्रवर्ग (SC, ST किंवा अन्य)</label>
+                            <select id="col_13" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="१- अनुसूचित जाती">१- अनुसूचित जाती</option>
+                                <option value="२-अनुसूचित जमाती">२-अनुसूचित जमाती</option>
+                                <option value="३- अन्य">३- अन्य</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">१४-मालकी हक्काची स्थिती</label>
+                            <select id="col_14" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="१- स्वतःचे घर">१- स्वतःचे घर</option>
+                                <option value="१- भाड्याचे परंतु इतरत्र स्वतःचे घर असलेले">१- भाड्याचे परंतु इतरत्र स्वतःचे घर असलेले</option>
+                                <option value="१- भाड्याचे आणि कोठेही स्वतःचे घर नसलेले">१- भाड्याचे आणि कोठेही स्वतःचे घर नसलेले</option>
+                                <option value="४- इतर">४- इतर</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">१५ - निवास योग्य खोल्यांची संख्या</label>
+                            <input type="number" id="col_15" class="form-control" placeholder="उदा. 2">
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">१६ . विवाहित जोडप्यांची संख्या</label>
+                            <input type="number" id="col_16" class="form-control" placeholder="उदा. 1">
+                        </div>
+
+                        <!-- Section 4 -->
+                        <div class="section-title">मूलभूत सुविधा (Amenities)</div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">१७. पिण्याच्या पाण्याचा मुख्य स्रोत</label>
+                            <select id="col_17" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="१- प्रक्रिया केलेले नळाद्वारे">१- प्रक्रिया केलेले नळाद्वारे</option>
+                                <option value="२ - प्रक्रिया न केलेले नळाद्वारे">२ - प्रक्रिया न केलेले नळाद्वारे</option>
+                                <option value="३- विहीर">३- विहीर</option>
+                                <option value="४- हात पंप">४- हात पंप</option>
+                                <option value="५- ट्यूब वेल / बोअर वेल">५- ट्यूब वेल / बोअर वेल</option>
+                                <option value="६- झरा">६- झरा</option>
+                                <option value="७- नदी/कालवा">७- नदी/कालवा</option>
+                                <option value="८- टॅंक/तळे / सरोवर">८- टॅंक/तळे / सरोवर</option>
+                                <option value="९- पॅक/ बाटली बंद पाणी">९- पॅक/ बाटली बंद पाणी</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">१८. पाण्याची उपलब्धता स्रोत</label>
+                            <select id="col_18" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="१- परिसरात">१- परिसरात</option>
+                                <option value="२- परिसराजवळ">२- परिसराजवळ</option>
+                                <option value="३- दूर">३- दूर</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">१९. प्रकाशाचा मुख्य स्रोत</label>
+                            <select id="col_19" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-वीज">1-वीज</option>
+                                <option value="2-रॉकेल">2-रॉकेल</option>
+                                <option value="3-सौरऊर्जा">3-सौरऊर्जा</option>
+                                <option value="4-इतर तेल">4-इतर तेल</option>
+                                <option value="5-इतर">5-इतर</option>
+                                <option value="6-प्रकाशाची सोय नाही">6-प्रकाशाची सोय नाही</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">20. शौचालयाची उपलब्धता</label>
+                            <select id="col_20" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-केवळ कुटुंबाच्याच वापरासाठी">1-केवळ कुटुंबाच्याच वापरासाठी</option>
+                                <option value="2-इतर कुटुंबासह सामायिक वापर">2-इतर कुटुंबासह सामायिक वापर</option>
+                                <option value="3-सार्वजनिक शौचालय">3-सार्वजनिक शौचालय</option>
+                                <option value="4-उघड्यावर">4-उघड्यावर</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">21. शौचालयाचा प्रकार</label>
+                            <select id="col_21" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="फ्लश/पोअर फ्लश शौचालय">फ्लश/पोअर फ्लश शौचालय</option>
+                                <option value="द्विखड्डा शौचालय">द्विखड्डा शौचालय</option>
+                                <option value="एकल खड्डा शौचालय">एकल खड्डा शौचालय</option>
+                                <option value="4-लादीसह / व्हेंटिलेटेड सुधारित खड्डा">4-लादीसह / व्हेंटिलेटेड सुधारित खड्डा</option>
+                                <option value="5-लादीशिवाय/उघडा खड्डा">5-लादीशिवाय/उघडा खड्डा</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">22. सांडपाणी सोडण्याची व्यवस्था</label>
+                            <select id="col_22" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-पाइपद्वारे मलनिःसारण">1-पाइपद्वारे मलनिःसारण</option>
+                                <option value="2-सेप्टिक टँक">2-सेप्टिक टँक</option>
+                                <option value="3-इतर व्यवस्था">3-इतर व्यवस्था</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">23. परिसरामध्ये स्नानगृहाची उपलब्धता</label>
+                            <select id="col_23" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-बंद गटार">1-बंद गटार</option>
+                                <option value="2-उघडे गटार">2-उघडे गटार</option>
+                                <option value="3-गटार नसल्यास">3-गटार नसल्यास</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">24. स्वयंपाकघर आणि एलपीजी /पीएनजी</label>
+                            <select id="col_24" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-स्नानगृह">1-स्नानगृह</option>
+                                <option value="2-छपराशिवाय बंदिस्त">2-छपराशिवाय बंदिस्त</option>
+                                <option value="3-स्नानगृहाची सुविधा नाही">3-स्नानगृहाची सुविधा नाही</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">25. स्वयंपाकासाठी वापरण्यात येणारे मुख्य इंधन</label>
+                            <select id="col_25" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="स्वयंपाकघरामध्ये स्वयंपाक करत असल्यास">स्वयंपाकघरामध्ये स्वयंपाक करत असल्यास</option>
+                                <option value="1-एलपीजी/पीएनजी जोडणी आहे">1-एलपीजी/पीएनजी जोडणी आहे</option>
+                                <option value="2-एलपीजी/पीएनजी जोडणी नाही">2-एलपीजी/पीएनजी जोडणी नाही</option>
+                                <option value="घरामध्ये स्वयंपाक केला जातो परंतु स्वयंपाकघरात नाही">घरामध्ये स्वयंपाक केला जातो परंतु स्वयंपाकघरात नाही</option>
+                                <option value="घराबाहेर/खुल्या जागेत स्वयंपाक करत असल्यास">घराबाहेर/खुल्या जागेत स्वयंपाक करत असल्यास</option>
+                                <option value="7-स्वयंपाक करत नाही">7-स्वयंपाक करत नाही</option>
+                            </select>
+                        </div>
+
+                        <!-- Section 5 -->
+                        <div class="section-title">साधने आणि मालमत्ता (Assets)</div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">26. रेडिओ/ट्रान्झिस्टर</label>
+                            <select id="col_26" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-जळाऊ लाकूड">1-जळाऊ लाकूड</option>
+                                <option value="2-पिकाचा उर्वरित भाग">2-पिकाचा उर्वरित भाग</option>
+                                <option value="3-शेणाच्या गोवऱ्या">3-शेणाच्या गोवऱ्या</option>
+                                <option value="4-कोळसा/लिग्नाईट/लोणारी कोळसा">4-कोळसा/लिग्नाईट/लोणारी कोळसा</option>
+                                <option value="5-रॉकेल">5-रॉकेल</option>
+                                <option value="6-एलपीजी/पीएनजी">6-एलपीजी/पीएनजी</option>
+                                <option value="7-वीज">7-वीज</option>
+                                <option value="8-गोबर गॅस/जैव गॅस">8-गोबर गॅस/जैव गॅस</option>
+                                <option value="9-सौरऊर्जा">9-सौरऊर्जा</option>
+                                <option value="0-इतर">0-इतर</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">27. दूरचित्रवाणी (TV)</label>
+                            <select id="col_27" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-परंपरागत रेडिओ संच">1-परंपरागत रेडिओ संच</option>
+                                <option value="2-मोबाइल/स्मार्टफोनवर">2-मोबाइल/स्मार्टफोनवर</option>
+                                <option value="3-इतर कोणत्याही उपकरणावर">3-इतर कोणत्याही उपकरणावर</option>
+                                <option value="4-नाही">4-नाही</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">28. इंटरनेट उपलब्धता</label>
+                            <select id="col_28" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="होय">होय</option>
+                                <option value="1-दूरदर्शन निःशुल्क डिश">1-दूरदर्शन निःशुल्क डिश</option>
+                                <option value="2-इतर डीटीएच/डिश">2-इतर डीटीएच/डिश</option>
+                                <option value="3-केबल जोडणी">3-केबल जोडणी</option>
+                                <option value="4-इतर कोणतेही">4-इतर कोणतेही</option>
+                                <option value="5-नाही">5-नाही</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">29. लॅपटॉप/संगणक</label>
+                            <select id="col_29" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-लॅपटॉप/संगणकावर">1-लॅपटॉप/संगणकावर</option>
+                                <option value="2-मोबाइल/स्मार्टफोनवर">2-मोबाइल/स्मार्टफोनवर</option>
+                                <option value="3-इतर कोणत्याही उपकरणावर">3-इतर कोणत्याही उपकरणावर</option>
+                                <option value="4-नाही">4-नाही</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">30. दूरध्वनी आणि मोबाइल फोन</label>
+                            <select id="col_30" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-होय">1-होय</option>
+                                <option value="2-नाही">2-नाही</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">31. सायकल आणि स्कूटर</label>
+                            <select id="col_31" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-फक्त लँडलाईन">1-फक्त लँडलाईन</option>
+                                <option value="2-स्मार्टफोन">2-स्मार्टफोन</option>
+                                <option value="3-इतर मूलभूत mobile">3-इतर मूलभूत mobile</option>
+                                <option value="4-दोन्ही">4-दोन्ही</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">32. कार/जीप/व्हॅन</label>
+                            <select id="col_32" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-सायकल">1-सायकल</option>
+                                <option value="2-स्कूटर/मोटरसायकल/मोपेड">2-स्कूटर/मोटरसायकल/मोपेड</option>
+                                <option value="3-दोन्ही">3-दोन्ही</option>
+                                <option value="4-नाही">4-नाही</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">33. मुख्य धान्य</label>
+                            <select id="col_33" class="form-select">
+                                <option value="">निवडा...</option>
+                                <option value="1-होय">1-होय</option>
+                                <option value="2-नाही">2-नाही</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <label class="form-label">३४. मोबाइल क्रमांक</label>
+                            <input type="text" id="col_34" class="form-control" placeholder="१० अंकी नंबर">
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="text-center mt-4">
+                        <button type="button" onclick="addData()" class="btn btn-custom px-4 py-2 me-2">➕ डेटा जोडा (Add Data)</button>
+                        <button type="button" onclick="downloadExcel()" class="btn btn-excel px-4 py-2">📥 एक्सेल डाउनलोड करा (.xlsx)</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Table Preview -->
+            <div class="table-responsive">
+                <h5 class="mb-3">📊 भरलेल्या डेटाची झलक (Preview): <span id="recordCount" class="badge bg-secondary">0 नोंदी</span></h5>
+                <table class="table table-bordered table-striped table-sm" id="previewTable">
+                    <thead class="table-dark" id="tableHead">
+                        <!-- Headers dynamically generated via script -->
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="34" class="text-center text-muted">अजून कोणतीही नोंद केलेली नाही.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Exact column headers ordered 1 to 34 from your survey data
+    const headers = [
+        "ओळ क्र. ", "इमारत क्र. ", "गणना घर क्र. ", "४- जमिनीसाठी मुख्यत: वापरलेले साहित्य ", 
+        "५- भिंतीसाठी  मुख्यत: वापरलेले साहित्य ", "६- छप्परासाठी  मुख्यत: वापरलेले साहित्य ", 
+        "७. गणना घरच्या वापरासंबंधी खात्री करा ", "८- गणना घराची स्थिती", "९- कुटुंब क्रमांक", 
+        "१०- कुटुंबातील सामान्यत: निवास करणाऱ्या  एकूण व्यक्तींची संख्या", "११- कुटुंब प्रमुखाचे नाव", 
+        "१२ - कुटुंब प्रमुखाचे लिंग ", "१३ . कुटुंब प्रमुख अनुसूचित जाती (SC), अनुसूचित जमाती (ST) किंवा अन्य प्रवर्गातील आहे का?", 
+        "१४-गणना घराच्या मालकी हक्काची स्थिती", "१५ - निवास योग्य खोल्यांची संख्या", "१६ . कुटुंबात राहत असलेल्या विवाहित जोडप्यांची संख्या ", 
+        "१७. पिण्याच्या पाण्याचा मुख्य स्रोत", "१८. पिण्याच्या पाण्याची उपलब्धता असलेला स्रोत", "१९. प्रकाशाचा मुख्य स्रोत", 
+        "20. शौचालयाची उपलब्धता", "21. शौचालयाचा प्रकार", "22. सांडपाणी सोडण्यासाठी जोडलेली व्यवस्था", 
+        "23. परिसरामध्ये स्नानगृहाची उपलब्धता", "24. स्वयंपाकघराची उपलब्धता आणि एलपीजी /पीएनजी जोडणी", 
+        "25. स्वयंपाकासाठी वापरण्यात येणारे मुख्य इंधन", "26. रेडिओ/ट्रान्झिस्टर", "27. दूरचित्रवाणी", 
+        "28. इंटरनेट उपलब्धता", "29. लॅपटॉप/संगणक", "30. दूरध्वनी आणि mobile phone/smart phone", 
+        "31. सायकल आणि स्कूटर/मोटरसायकल/मोपेड", "32. कार/जीप/व्हॅन", "33. कुटुंबात सेवन केले जाणारे मुख्य धान्य", 
+        "३४. मोबाइल क्रमांक "
+    ];
+
+    let allData = [];
+
+    // Initialize table headers
+    window.onload = function() {
+        let tr = document.createElement('tr');
+        headers.forEach(h => {
+            let th = document.createElement('th');
+            th.innerText = h;
+            th.style.fontSize = "12px";
+            th.style.whiteSpace = "nowrap";
+            tr.appendChild(th);
+        });
+        document.getElementById('tableHead').appendChild(tr);
+        
+        // Auto-fill row number 1
+        document.getElementById('col_1').value = 1;
+    };
+
+    function addData() {
+        let rowObj = {};
+        let rowArray = [];
+        
+        // Loop through 34 items
+        for(let i=1; i<=34; i++) {
+            let val = document.getElementById('col_' + i).value;
+            rowObj[headers[i-1]] = val;
+            rowArray.push(val);
+        }
+
+        if(!document.getElementById('col_1').value) {
+            alert("कृपया ओळ क्रमांक भरा!");
+            return;
+        }
+
+        allData.push(rowObj);
+        updateTable();
+        
+        // Reset form controls except row number which shifts to next
+        let nextRow = parseInt(document.getElementById('col_1').value) + 1;
+        document.getElementById('surveyForm').reset();
+        document.getElementById('col_1').value = nextRow;
+    }
+
+    function updateTable() {
+        let tbody = document.getElementById('tableBody');
+        tbody.innerHTML = "";
+        document.getElementById('recordCount').innerText = allData.length + " नोंदी";
+
+        if(allData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="34" class="text-center text-muted">अजून कोणतीही नोंद केलेली नाही.</td></tr>`;
+            return;
+        }
+
+        allData.forEach(row => {
+            let tr = document.createElement('tr');
+            headers.forEach(h => {
+                let td = document.createElement('td');
+                td.innerText = row[h] || "";
+                td.style.fontSize = "12px";
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    function downloadExcel() {
+        if(allData.length === 0) {
+            alert("डाउनलोड करण्यासाठी आधी किमान १ नोंद (Data) जोडा!");
+            return;
+        }
+        
+        // Convert JSON data to worksheet
+        let ws = XLSX.utils.json_to_sheet(allData, { header: headers });
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Survey Data");
+        
+        // Generate Excel file and download
+        XLSX.writeFile(wb, "Survey_Data_Entry.xlsx");
+    }
+</script>
+
+</body>
+</html>
