@@ -1,23 +1,264 @@
-# Let's read Sheet2 properly and extract all non-null dropdown items for each column.
-# Then create an improved HTML application that saves data to localStorage, so refreshing the page won't delete the data!
-import pandas as pd
-import json
+# Excellent! Let's generate a highly advanced HTML file that solves the refresh problem.
+# It will use HTML5 localStorage to automatically store all entered rows on the phone/browser.
+# Even if they close the browser, refresh the page, or turn off the phone, the data will remain perfectly safe!
+# It will also have a "डेटा क्लिअर करा (Clear Data)" button when they want to start a completely new survey sheet.
 
-df_sheet2 = pd.read_csv('survey data.xlsx - Sheet2.csv')
-cols = df_sheet2.columns.tolist()
+html_template = """<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>सर्व्हे डेटा एन्ट्री सॉफ्टवेअर (सुरक्षित आवृत्ती)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        body { background-color: #f0f4f8; font-family: 'Segoe UI', Arial, sans-serif; padding-bottom: 60px; }
+        .header-bg { background: linear-gradient(135deg, #107c41, #1f9a55); color: white; padding: 20px; border-radius: 0 0 20px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .form-container { background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-top: 20px; }
+        .form-label { font-weight: 600; color: #2d3748; margin-top: 12px; font-size: 14px; }
+        .form-control, .form-select { border-radius: 8px; border: 1px solid #cbd5e1; padding: 8px 12px; }
+        .form-control:focus, .form-select:focus { border-color: #107c41; box-shadow: 0 0 0 3px rgba(16, 124, 65, 0.15); }
+        .section-title { background: #e2f0d9; padding: 10px 15px; border-left: 6px solid #107c41; margin-top: 25px; font-weight: 700; color: #0e5c30; border-radius: 4px; font-size: 16px; }
+        .btn-add { background-color: #107c41; color: white; font-weight: bold; border-radius: 8px; transition: all 0.2s; }
+        .btn-add:hover { background-color: #0b592e; color: white; }
+        .btn-excel { background-color: #1f4e79; color: white; font-weight: bold; border-radius: 8px; }
+        .btn-excel:hover { background-color: #143452; color: white; }
+        .btn-clear { background-color: #dc3545; color: white; font-weight: bold; border-radius: 8px; }
+        .table-responsive { margin-top: 30px; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .badge-count { font-size: 16px; padding: 6px 12px; border-radius: 20px; }
+        .sticky-summary { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 10px; border-radius: 8px; margin-top: 15px; font-weight: 600; }
+    </style>
+</head>
+<body>
 
-# Let's get the mapping for all 34 columns from sheet2 to make sure everything matches perfectly.
-# Columns mapping:
-col_options = {}
-for i, col in enumerate(cols, 1):
-    vals = df_sheet2[col].dropna().tolist()
-    # Clean spaces
-    vals = [str(v).strip() for v in vals if str(v).strip() != '']
-    col_options[i] = {
-        'name': col.strip(),
-        'options': vals
+<div class="container-fluid px-3 px-md-5">
+    <div class="header-bg text-center">
+        <h2 class="fw-bold">📋 सर्व्हे डेटा एन्ट्री ऑनलाईन सॉफ्टवेअर</h2>
+        <p class="mb-0 opacity-90">✨ **सुरक्षित आवृत्ती (Data Safe)**: मोबाईल रिफ्रेश किंवा बंद केला तरी डेटा डिलीट होणार नाही!</p>
+    </div>
+
+    <div class="sticky-summary text-center">
+        ⚠️ टीप: सर्व डेटा तुमच्या मोबाईलच्या मेमरीमध्ये सुरक्षितपणे सेव्ह (Save) होत आहे. काम संपल्यावर 'एक्सेल डाउनलोड करा' बटणावर क्लिक करायला विसरू नका.
+    </div>
+
+    <div class="form-container">
+        <form id="surveyForm">
+            <div class="row">
+"""
+
+# Let's generate fields dynamically into the HTML based on extracted columns
+# We can create sections to make it look professional
+current_section = ""
+
+for i, col in enumerate(all_cols_data, 1):
+    label = col['label']
+    opts = col['options']
+    
+    # Organize sections based on column index
+    if i == 1:
+        html_template += '\n                <div class="section-title">📍 भाग १: प्राथमिक आणि घराची माहिती (Basic & Building Info)</div>\n'
+    elif i == 9:
+        html_template += '\n                <div class="section-title">👤 भाग २: कुटुंब आणि प्रमुखाची माहिती (Family & Head Info)</div>\n'
+    elif i == 17:
+        html_template += '\n                <div class="section-title">💧 भाग ३: पिण्याचे पाणी आणि मूलभूत सुविधा (Water & Amenities)</div>\n'
+    elif i == 26:
+        html_template += '\n                <div class="section-title">🚗 भाग ४: साधनांची उपलब्धता आणि मुख्य धान्य (Assets & Material Info)</div>\n'
+        
+    html_template += f'                <div class="col-lg-4 col-md-6 col-sm-12">\n                    <label class="form-label">{label}</label>\n'
+    
+    if len(opts) > 0:
+        # Dropdown select field
+        html_template += f'                    <select id="col_{i}" class="form-select">\n                        <option value="">निवडा...</option>\n'
+        for opt in opts:
+            html_template += f'                        <option value="{opt}">{opt}</option>\n'
+        html_template += '                    </select>\n'
+    else:
+        # Text/Number Input field
+        if i in [1, 10, 15, 16]:
+            html_template += f'                    <input type="number" id="col_{i}" class="form-control" placeholder="संख्या लिहा...">\n'
+        else:
+            html_template += f'                    <input type="text" id="col_{i}" class="form-control" placeholder="माहिती लिहा...">\n'
+            
+    html_template += '                </div>\n'
+
+html_template += """
+            </div>
+
+            <div class="row mt-4 pt-3 border-top">
+                <div class="col-12 text-center">
+                    <button type="button" onclick="addData()" class="btn btn-add btn-lg px-4 my-1">➕ डेटा सुरक्षित जोडा (Add Data)</button>
+                    <button type="button" onclick="downloadExcel()" class="btn btn-excel btn-lg px-4 my-1">📥 एक्सेल डाउनलोड करा (.xlsx)</button>
+                    <button type="button" onclick="clearAllData()" class="btn btn-clear btn-lg px-3 my-1 float-md-end">🗑️ सर्व डेटा साफ करा</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+            <h5 class="fw-bold text-success mb-2">📊 भरलेल्या एकूण नोंदींची यादी (Live Preview)</h5>
+            <span id="recordCount" class="badge bg-success badge-count">0 नोंदी सेव्ह आहेत</span>
+        </div>
+        <div class="table-wrapper" style="overflow-x: auto; max-height: 400px;">
+            <table class="table table-bordered table-striped table-hover align-middle" id="previewTable">
+                <thead class="table-dark sticky-top">
+                    <tr id="tableHead"></tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="34" class="text-center text-muted py-4">अजून कोणतीही नोंद उपलब्ध नाही. वर फॉर्म भरून 'डेटा सुरक्षित जोडा' वर क्लिक करा.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Full headers array matching your excel sheet exactly
+    const headers = [
+"""
+
+# Append exact header strings from survey file
+for col in cols:
+    html_template += f'        "{col.strip()}",\n'
+
+html_template += """    ];
+
+    // Array to store rows in memory
+    let allData = [];
+
+    // When page loads, recover data from localStorage if it exists
+    window.onload = function() {
+        // Setup table headers
+        let thr = document.getElementById('tableHead');
+        headers.forEach(h => {
+            let th = document.createElement('th');
+            th.innerText = h;
+            th.style.fontSize = "13px";
+            th.style.whiteSpace = "nowrap";
+            thr.appendChild(th);
+        });
+
+        // Recover existing data from LocalStorage
+        let storedData = localStorage.getItem('survey_saved_data');
+        if (storedData) {
+            allData = JSON.parse(storedData);
+            updateTable();
+        }
+
+        // Set next row number auto-incremented
+        setNextRowNumber();
+    };
+
+    function setNextRowNumber() {
+        if (allData.length > 0) {
+            // Find max serial number from existing data or just lengths + 1
+            let lastRowVal = parseInt(allData[allData.length - 1][headers[0]]);
+            document.getElementById('col_1').value = isNaN(lastRowVal) ? allData.length + 1 : lastRowVal + 1;
+        } else {
+            document.getElementById('col_1').value = 1;
+        }
     }
 
-print(json.dumps(col_options[4], ensure_ascii=False))
-print(json.dumps(col_options[5], ensure_ascii=False))
-print(json.dumps(col_options[20], ensure_ascii=False))
+    function addData() {
+        if(!document.getElementById('col_1').value) {
+            alert("⚠️ कृपया ओळ क्रमांक (Serial No.) नक्की भरा!");
+            return;
+        }
+
+        let rowObj = {};
+        for(let i=1; i<=34; i++) {
+            let field = document.getElementById('col_' + i);
+            rowObj[headers[i-1]] = field ? field.value.stripOrEmpty() : "";
+        }
+
+        // Add to array
+        allData.push(rowObj);
+
+        // Crucial fix: Save to browser's LocalStorage immediately!
+        localStorage.setItem('survey_saved_data', JSON.stringify(allData));
+
+        // Refresh table view
+        updateTable();
+
+        // Reset all fields except basic counters
+        let currentBuilding = document.getElementById('col_2').value;
+        let currentHouse = document.getElementById('col_3').value;
+        let currentFamily = document.getElementById('col_9').value;
+        
+        document.getElementById('surveyForm').reset();
+        
+        // Retain building and house counts for fast entry
+        document.getElementById('col_2').value = currentBuilding;
+        document.getElementById('col_3').value = currentHouse;
+        
+        // Auto-increment serial number
+        setNextRowNumber();
+        
+        // Smooth scroll to see the updated table count
+        alert("✅ नोंद यशस्वीरित्या सेव्ह झाली आणि मेमरीमध्ये सुरक्षित केली गेली आहे!");
+    }
+
+    String.prototype.stripOrEmpty = function() {
+        return this.trim();
+    };
+
+    function updateTable() {
+        let tbody = document.getElementById('tableBody');
+        tbody.innerHTML = "";
+        document.getElementById('recordCount').innerText = allData.length + " नोंदी सेव्ह आहेत";
+
+        if(allData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="34" class="text-center text-muted py-4">अजून कोणतीही नोंद उपलब्ध नाही. वर फॉर्म भरून 'डेटा सुरक्षित जोडा' वर क्लिक करा.</td></tr>`;
+            return;
+        }
+
+        // Show data in reverse order so latest entry is always on top for user visibility
+        let renderData = [...allData].reverse();
+
+        renderData.forEach(row => {
+            let tr = document.createElement('tr');
+            headers.forEach(h => {
+                let td = document.createElement('td');
+                td.innerText = row[h] || "";
+                td.style.fontSize = "12px";
+                td.style.whiteSpace = "nowrap";
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    function downloadExcel() {
+        if(allData.length === 0) {
+            alert("⚠️ डाउनलोड करण्यासाठी आधी किमान १ नोंद (Data) जोडा!");
+            return;
+        }
+        
+        // Convert data to Excel Sheet
+        let ws = XLSX.utils.json_to_sheet(allData, { header: headers });
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Survey Data DataEntry");
+        
+        // Generate filename with timestamp
+        let dateStr = new Date().toISOString().slice(0,10);
+        XLSX.writeFile(wb, `Survey_Data_Entry_${dateStr}.xlsx`);
+    }
+
+    function clearAllData() {
+        if(confirm("🚨 तुम्ही खात्री बाळगता का? यामुळे मोबाईलमध्ये सेव्ह असलेला सर्व ३४ कॉलमचा डेटा कायमचा डिलीट होईल! आधी एक्सेल फाईल डाऊनलोड केली आहे ना?")) {
+            localStorage.removeItem('survey_saved_data');
+            allData = [];
+            updateTable();
+            setNextRowNumber();
+            alert("🗑️ सर्व डेटा यशस्वीरित्या साफ केला गेला आहे. आता तुम्ही नवीन काम सुरू करू शकता.");
+        }
+    }
+</script>
+
+</body>
+</html>
+"""
+
+with open("Survey_Data_Entry_Safe_App.html", "w", encoding="utf-8") as f:
+    f.write(html_template)
+print("Safe application successfully generated with localStorage implementation.")
