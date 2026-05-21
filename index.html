@@ -39,41 +39,6 @@
     <div class="form-container">
         <form id="surveyForm">
             <div class="row">
-"""
-
-# Generating form fields with 100% perfect list sync
-for i, col in enumerate(df_sheet2.columns, 1):
-    label = col.strip()
-    opts = df_sheet2[col].dropna().tolist()
-    opts = [str(o).strip() for o in opts if str(o).strip() != '']
-    
-    if i == 1:
-        html_template_perfect += '\n                <div class="section-title">📍 भाग १: प्राथमिक आणि घराची माहिती (Basic & Building Info)</div>\n'
-    elif i == 9:
-        html_template_perfect += '\n                <div class="section-title">👤 भाग २: कुटुंब आणि प्रमुखाची माहिती (Family & Head Info)</div>\n'
-    elif i == 17:
-        html_template_perfect += '\n                <div class="section-title">💧 भाग ३: पिण्याचे पाणी आणि मूलभूत सुविधा (Water & Amenities)</div>\n'
-    elif i == 26:
-        html_template_perfect += '\n                <div class="section-title">🚗 भाग ४: साधनांची उपलब्धता आणि मुख्य धान्य (Assets & Material Info)</div>\n'
-        
-    html_template_perfect += f'                <div class="col-lg-4 col-md-6 col-sm-12">\n                    <label class="form-label">{label}</label>\n'
-    
-    if len(opts) > 0:
-        html_template_perfect += f'                    <select id="col_{i}" class="form-select">\n                        <option value="">निवडा...</option>\n'
-        for opt in opts:
-            # escaping single/double quotes if any
-            opt_esc = opt.replace('"', '&quot;')
-            html_template_perfect += f'                        <option value="{opt_esc}">{opt}</option>\n'
-        html_template_perfect += '                    </select>\n'
-    else:
-        if i in [1, 10, 15, 16]:
-            html_template_perfect += f'                    <input type="number" id="col_{i}" class="form-control" placeholder="संख्या लिहा...">\n'
-        else:
-            html_template_perfect += f'                    <input type="text" id="col_{i}" class="form-control" placeholder="माहिती लिहा...">\n'
-            
-    html_template_perfect += '                </div>\n'
-
-html_template_perfect += """
             </div>
 
             <div class="row mt-4 pt-3 border-top">
