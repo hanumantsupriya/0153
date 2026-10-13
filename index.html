@@ -188,8 +188,6 @@ tr:nth-child(even) { background-color: #f9f9f9; }
             </div>
             <div class="btn-group">
                 <button class="btn-add" id="saveEntryBtn" onclick="addEntry()">जतन करा (Save Entry)</button>
-                <button class="btn-pagebreak" onclick="manualPageBreak()">🛑 पेज ब्रेक करा (Manual Break)</button>
-                <button class="btn-pagebreak" style="background-color:#c2185b;" onclick="undoLastPageBreak()">↩️ शेवटचा ब्रेक हटवा</button>
                 <button class="btn-excel" onclick="downloadExcel()">Excel डाउनलोड करा</button>
                 <button class="btn-delete" id="deleteBtn" style="display: none;" onclick="deleteLastEntry()">शेवटची नोंद हटवा</button>
                 <button class="btn-clear" onclick="clearAllData()">सर्व डेटा पुसा</button>
@@ -278,15 +276,17 @@ tr:nth-child(even) { background-color: #f9f9f9; }
         <table id="summaryChartTable">
             <thead>
                 <tr class="summary-header">
-                    <th>पान नंबर व अवधी (Page No &amp; Period)</th>
-                    <th>एकूण हजर दिवस (Total F)</th>
-                    <th>एकूण साठलेली EL (Total G)</th>
-                    <th>एकूण साठलेली ML (Total H)</th>
-                    <th>उपभोगलेली EL (Spent EL)</th>
-                    <th>उपभोगलेली ML (Spent ML)</th>
-                    <th>विशेष रजा (Special)</th>
-                    <th>एकूण LWP (Total E)</th>
-                </tr>
+    <th>पान नंबर व अवधी (Page No &amp; Period)</th>
+    <th>एकूण हजर दिवस (Total F)</th>
+    <th>एकूण साठलेली EL (Total G)</th>
+    <th>एकूण साठलेली ML (Total H)</th>
+    <th>उपभोगलेली EL (Spent EL)</th>
+    <th>उपभोगलेली ML (Spent ML)</th>
+    <th style="background-color: #e65100;">सरेंडर रजा (Surrender)</th>
+    <th>विशेष रजा (Special)</th>
+    <th>एकूण LWP (Total E)</th>
+    <th style="background-color: #2e7d32;">एकूण सेवा कालावधी (हजर+रजा)</th>
+</tr>
             </thead>
             <tbody></tbody>
         </table>
@@ -582,11 +582,30 @@ window.onload = function() {
     }
 };
 
+// १९७० ते २०६९ कट-ऑफ वर्ष तपासणी
+function parseSmartYear(yearStr) {
+    if (!yearStr) return null;
+    let y = parseInt(yearStr, 10);
+    if (isNaN(y)) return null;
+    if (yearStr.length <= 2) {
+        return (y >= 70 && y <= 99) ? (1900 + y) : (2000 + y);
+    }
+    return y;
+}
+
 function parseDMY(str) {
-    if(!str) return null;
-    let parts = str.split("/");
-    if(parts.length < 3) return null;
-    return new Date(parts[2], parts[1] - 1, parts[0]);
+    if (!str || typeof str !== "string") return null;
+    str = str.trim();
+    if (str === "---" || str.includes("हिशोब बंद") || str.includes("रोखीकरण")) return null;
+    let parts = str.split(/[\/\-\.]/);
+    if (parts.length < 3) return null;
+    let d = parseInt(parts[0], 10);
+    let m = parseInt(parts[1], 10);
+    let y = parseSmartYear(parts[2].trim());
+    if (!isNaN(d) && !isNaN(m) && !isNaN(y) && d > 0 && d <= 31 && m > 0 && m <= 12) {
+        return new Date(y, m - 1, d);
+    }
+    return null;
 }
 
 function formatDMY(dateObj) {
@@ -1034,15 +1053,19 @@ function addEntry() {
     if(isClosure) {
         q = "सेवा समाप्ती (हिशोब बंद)";
         o = "---"; p = "---"; r_diff_val = 0;
-    } else if(q === "सरेंडर रजा") {
+   } else if(q === "सरेंडर रजा") {
         let surrenderDays = parseInt(document.getElementById('surrender_days_input').value, 10);
-        if (isNaN(surrenderDays) || surrenderDays <= 0) { alert("कृपया सरेंडर रजा दिवस टाका!"); return; }
-        r_diff_val = surrenderDays;
-    } else {
-        let do1 = parseDMY(o); let dp1 = parseDMY(p);
-        if (do1 && dp1) { r_diff_val = Math.round((dp1.getTime() - do1.getTime()) / (1000 * 60 * 60 * 24)) + 1; }
-    }
-
+        if (isNaN(surrenderDays) || surrenderDays <= 0) { 
+            alert("कृपया सरेंडर रजा दिवस टाका!"); 
+            return; 
+        }
+        let doubleRequired = surrenderDays * 2;
+        // शिल्लक हक्काची रजा दुप्पट दिवसांपेक्षा कमी असल्यास रजा नाकारली जाईल
+        if (doubleRequired > availEL_days) {
+            alert(`❌ शिल्लक हक्काची रजा अपुरी असल्यामुळे सरेंडर रजा मिळणार नाही!\n\nमागणी: ${surrenderDays} दिवस (खर्चासाठी आवश्यक: ${doubleRequired} दिवस)\nउपलब्ध शिल्लक: ${availEL_days} दिवस.`);
+            return;
+        }
+        r_diff_val = doubleRequired; // हक्काच्या रजेतून दुप्पट दिवस (उदा. ६२) खर्ची पडतील
     // ३. शिल्लक रजेनुसार समायोजन (Leave Exhaustion Logic)
     let autoLwpDays = 0;
     let spentML = 0, spentEL = 0;
@@ -1105,10 +1128,10 @@ function addEntry() {
             leaveLwpIntervals.push({ start: formatDMY(lwpStart), end: p });
         }
     }
-
-    let entryObject = {
+        let entryObject = {
         type: "regular", a: a, b: (q === "सरेंडर रजा" ? "सरेंडर रजा" : b), e: e, f: 0, g: 0, h: 0, k_val: 0, l_val: 0,
         o: (q === "सरेंडर रजा" ? "रोखीकरण" : o), p: (q === "सरेंडर रजा" ? r_diff_val + " दिवस" : p), q: q, r_diff: r_diff_val,
+        surrenderDays: (q === "सरेंडर रजा" ? surrenderDays : 0), // <-- ही ओळ इथे वाढवा
         spentEL: spentEL, spentML: spentML, autoLwpDays: autoLwpDays,
         finalEL: 0, finalML: 0, 
         lwpIntervals: dutyLwpIntervals, 
@@ -1117,8 +1140,10 @@ function addEntry() {
     };
 
     if(editIndex > -1) {
-        history[editIndex] = entryObject;
+        history[editIndex] = entryObject; // ओळ बदलली
         editIndex = -1;
+    }
+    recalculateAndRender(); // <-- हे फंक्शन
         document.getElementById('saveEntryBtn').innerText = "जतन करा (Save Entry)";
         document.getElementById('saveEntryBtn').style.backgroundColor = "#1a73e8";
     } else {
@@ -1268,7 +1293,12 @@ function renderTable() {
         if (pageStartDate === "") { pageStartDate = (item.type === "bonus") ? item.bonusStart : item.a; }
         let row = tbody.insertRow();
 
-        let actionButtons = '<button class="btn-row-edit" onclick="editRow(' + index + ')">एडिट</button><button class="btn-row-delete" onclick="deleteRow(' + index + ')">रद्द</button>';
+        let isBroken = pageBreaks.includes(index);
+let breakBtn = isBroken 
+    ? '<button style="background:#d32f2f; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;" onclick="toggleRowPageBreak(' + index + ')">पेज ब्रेक रद्द करा</button>'
+    : '<button style="background:#0288d1; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;" onclick="toggleRowPageBreak(' + index + ')">पेज ब्रेक करा</button>';
+
+let actionButtons = '<button class="btn-row-edit" onclick="editRow(' + index + ')">एडिट</button><button class="btn-row-delete" onclick="deleteRow(' + index + ')">रद्द</button>' + breakBtn;
 
         let currentEL_spent = 0;
         let currentML_spent = 0;
@@ -1299,6 +1329,10 @@ function renderTable() {
                 '<strong style="color:#d32f2f;">' + currentAutoLwp + ' दिवस</strong><br><small style="color:#b71c1c;">(' + item.leaveLwpIntervals.map(i=>i.start+" ते "+i.end).join(", ") + ')</small>' : 
                 (currentAutoLwp > 0 ? '<strong style="color:#d32f2f;">' + currentAutoLwp + ' दिवस</strong>' : '0');
 
+            // सरेंडर रजेसाठी ३१+३१=६२ असा डिस्प्ले तयार करणे
+            let displayR = (item.q === "सरेंडर रजा" && item.surrenderDays) 
+                ? (item.surrenderDays + '+' + item.surrenderDays + '=' + item.r_diff) 
+                : item.r_diff;
             row.innerHTML = '<td>' + ((item.b === "---" || item.b === "सरेंडर रजा") ? "---" : item.a + " - " + item.b) + '</td><td>' + item.f + '</td><td>' + lwpDutyText + '</td><td>' + item.g.toFixed(2) + '</td><td>' + item.h.toFixed(2) + '</td>' +
             '<td class="accumulated">' + item.k_val.toFixed(2) + '</td><td class="accumulated">' + item.l_val.toFixed(2) + '</td>' +
             '<td>' + item.o + ' - ' + item.p + '</td><td>' + item.q + '</td><td>' + item.r_diff + '</td>' +
@@ -1323,22 +1357,49 @@ function renderTable() {
         }
 
         if (pageBreaks.includes(index) || index === history.length - 1) {
+            // सरेंडर रजा वेगळी मोजणे
+        let currentSurrender = (item.q === "सरेंडर रजा") ? (item.surrenderDays || 0) : 0;
+        if (item.q === "सरेंडर रजा") {
+            currentEL_spent = item.surrenderDays || 0; // तक्ता ४ मध्ये ३१ दिवस हक्काची + ३१ दिवस सरेंडर = एकूण ६२
+        }
+
+        pgF += item.f; pgE += lwpValue; pgG += item.g; pgH += item.h;
+        pgEL_spent += currentEL_spent; pgML_spent += currentML_spent; pgSpl_spent += currentSpl_spent; pgAutoLwp += currentAutoLwp;
+        pgSurrender = (pgSurrender || 0) + currentSurrender;
+
+        grandF += item.f; grandE += lwpValue; grandG += item.g; grandH += item.h;
+        grandEL_spent += currentEL_spent; grandML_spent += currentML_spent; grandSpl_spent += currentSpl_spent; grandAutoLwp += currentAutoLwp;
+        grandSurrender = (grandSurrender || 0) + currentSurrender;
+
+        if (pageBreaks.includes(index) || index === history.length - 1) {
             let pageEndDate = (item.type === "bonus") ? item.bonusEnd : item.p;
             let pagePeriodText = pageStartDate + ' ते ' + pageEndDate;
 
             let convertedPgG = convertLeavePointsToDays(pgG, "EL");
             let convertedPgH = convertLeavePointsToDays(pgH, "ML");
             let totalPageLwp = pgE + pgAutoLwp;
+            
+            // एकूण सेवा कालावधी = हजर दिवस + घेतलेल्या रजा (अतिरिक्त सरेंडर न मोजता)
+            let totalPageService = pgF + pgEL_spent + pgML_spent + pgSpl_spent;
 
-            let brkRow = tbody.insertRow(); brkRow.className = "page-break-row";
-            let removeBreakBtn = pageBreaks.includes(index) ? 
-    '<button style="background:#d32f2f; color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer; font-weight:bold; font-size:10px;" onclick="removePageBreak(' + index + ')">❌ ब्रेक हटवा</button>' : '---';
-
-brkRow.innerHTML = '<td>[मॅन्युअल पान ' + pageNum + ' एकूण (' + pagePeriodText + ')]</td><td>' + (pageNum==1?grandF:pgF) + '</td><td>' + pgE + '</td><td>' + convertedPgG.toFixed(2) + '</td><td>' + convertedPgH.toFixed(2) + '</td><td colspan="4">--- CF ---</td><td>' + (pgEL_spent+pgML_spent+pgSpl_spent+pgAutoLwp) + '</td><td>---</td><td>---</td><td>' + pgAutoLwp + '</td><td>' + removeBreakBtn + '</td>';
+            if (pageBreaks.includes(index)) {
+                let brkRow = tbody.insertRow(); brkRow.className = "page-break-row";
+                brkRow.innerHTML = '<td colspan="14">--- मॅन्युअल पान ' + pageNum + ' समाप्त (' + pagePeriodText + ') ---</td>';
+            }
 
             let chartRow = chartBody.insertRow();
-            chartRow.innerHTML = '<td>पान नंबर ' + pageNum + ' (' + pagePeriodText + ')</td><td>' + (pageNum==1?grandF:pgF) + '</td><td>' + convertedPgG.toFixed(2) + '</td><td>' + convertedPgH.toFixed(2) + '</td><td>' + pgEL_spent + '</td><td>' + pgML_spent + '</td><td>' + pgSpl_spent + '</td><td style="color:#d32f2f; font-weight:bold;">' + totalPageLwp + '</td>';
-            pageNum++; pgF = 0; pgE = 0; pgG = 0; pgH = 0; pgEL_spent = 0; pgML_spent = 0; pgSpl_spent = 0; pgAutoLwp = 0; pageStartDate = "";
+            chartRow.innerHTML = '<td>पान नंबर ' + pageNum + ' (' + pagePeriodText + ')</td>' +
+                '<td>' + pgF + '</td>' +
+                '<td>' + convertedPgG.toFixed(2) + '</td>' +
+                '<td>' + convertedPgH.toFixed(2) + '</td>' +
+                '<td>' + pgEL_spent + '</td>' +
+                '<td>' + pgML_spent + '</td>' +
+                '<td style="color:#e65100; font-weight:bold;">' + pgSurrender + '</td>' +
+                '<td>' + pgSpl_spent + '</td>' +
+                '<td style="color:#d32f2f; font-weight:bold;">' + totalPageLwp + '</td>' +
+                '<td style="font-weight:bold; background:#e8f5e9; color:#1b5e20;">' + totalPageService + ' दिवस</td>';
+
+            pageNum++; pgF = 0; pgE = 0; pgG = 0; pgH = 0; pgEL_spent = 0; pgML_spent = 0; pgSpl_spent = 0; pgAutoLwp = 0; pgSurrender = 0; pageStartDate = "";
         }
     });
 
@@ -1348,7 +1409,8 @@ brkRow.innerHTML = '<td>[मॅन्युअल पान ' + pageNum + ' ए�
         let finalGrandH = convertLeavePointsToDays(grandH, "ML");
         let totalGrandLwp = grandE + grandAutoLwp;
 
-        gtRow.innerHTML = '<td>ग्रँड एकूण संख्या (Grand Total)</td><td>' + grandF + '</td><td>' + finalGrandG.toFixed(2) + '</td><td>' + finalGrandH.toFixed(2) + '</td><td>' + grandEL_spent + '</td><td>' + grandML_spent + '</td><td>' + grandSpl_spent + '</td><td style="color:#b71c1c; font-weight:bold;">' + totalGrandLwp + '</td>';
+        let totalGrandService = grandF + grandEL_spent + grandML_spent + grandSpl_spent;
+gtRow.innerHTML = '<td>ग्रँड एकूण संख्या (Grand Total)</td><td>' + grandF + '</td><td>' + finalGrandG.toFixed(2) + '</td><td>' + finalGrandH.toFixed(2) + '</td><td>' + grandEL_spent + '</td><td>' + grandML_spent + '</td><td style="color:#e65100; font-weight:bold;">' + grandSurrender + '</td><td>' + grandSpl_spent + '</td><td style="color:#b71c1c; font-weight:bold;">' + totalGrandLwp + '</td><td style="font-weight:bold; background:#c8e6c9; color:#1b5e20;">' + totalGrandService + ' दिवस</td>';
     }
     generateLeaveAndLwpReports();
 }
@@ -2577,6 +2639,18 @@ function clearFixationStatement() { calculatedStatements = []; renderStatementTa
             alert("त्रुटी: " + error.message);
         }
     });
+}
+    // ओळीवरील पेज ब्रेक जोडणे किंवा काढणे
+function toggleRowPageBreak(idx) {
+    if (pageBreaks.includes(idx)) {
+        pageBreaks = pageBreaks.filter(p => p !== idx);
+    } else {
+        pageBreaks.push(idx);
+        pageBreaks.sort((a, b) => a - b);
+    }
+    localStorage.setItem("pmc_page_breaks", JSON.stringify(pageBreaks));
+    recalculateAndRender();
+    if (typeof autoSyncEmployeeToFirebase === "function") autoSyncEmployeeToFirebase();
 }
 </script>
 </body>
