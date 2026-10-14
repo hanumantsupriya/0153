@@ -9,7 +9,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; pa
 .container { max-width: 1550px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 h2 { text-align: center; color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; margin-bottom: 20px; }
 .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; flex-wrap: wrap; }
-.tab-btn { padding: 12px 25px; border: none; background-color: #e0e0e0; font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 5px; transition: 0.3s; }
+.tab-btn { padding: 12px 25px; border: none; background-color: #e0e0e0; font-size: 15px; font-weight: bold; cursor: border; border-radius: 5px; transition: 0.3s; }
 .tab-btn.active { background-color: #1a73e8; color: white; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
@@ -734,10 +734,9 @@ function handleSurrenderLeaveType() {
     let surrenderDiv = document.getElementById('surrender_days_div');
 
     if (qType === "सरेंडर रजा") {
-        pLeaveInput.disabled = false; // O ते P तारखा भरण्यासाठी P चालू ठेवणे
+        pLeaveInput.disabled = false;
         if (surrenderDiv) surrenderDiv.style.display = "block";
         
-        // O आणि P भरले असल्यास दिवस आपोआप मोजून बॉक्समध्ये भरणे
         let oStr = document.getElementById('o_leave_start').value;
         let pStr = document.getElementById('p_leave_end').value;
         let do1 = parseDMY(oStr);
@@ -883,7 +882,20 @@ function generateLivePreview() {
 
         previewBox.innerHTML = `<span>📝 <strong>लाईव्ह प्रिव्ह्यू:</strong> हजर दिवस: <span style='color:blue;'>${f_days}</span> | सरेंडर रजा: <span style='color:purple;'>${sDays} दिवस</span> | हक्काच्या रजेतून खर्च: <strong style='color:red;'>${sDays}+${sDays}=${sDays*2} दिवस</strong></span>`;
         return;
+    } else {
+        let d1 = parseDMY(a); let d2 = parseDMY(b);
+        if(d1 && d2 && b !== "---") {
+            let total = Math.round((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+            f_days = Math.max(0, total - e);
+            g_el = Math.floor(f_days / 11) + (f_days % 11) / 100;
+            h_ml = Math.floor(f_days / 30) + (f_days % 30) / 100;
+        }
+        let do1 = parseDMY(o); let dp1 = parseDMY(p);
+        if(do1 && dp1) { r_leave = Math.round((dp1.getTime() - do1.getTime()) / (1000 * 60 * 60 * 24)) + 1; }
     }
+
+    previewBox.innerHTML = "<span>📝 <strong>लाईव्ह प्रिव्ह्यू:</strong> हजर दिवस: <span style='color:blue;'>" + f_days + "</span> | LWP: <span style='color:red;'>" + e + "</span> | नवीन EL साठणार: <span style='color:green;'>" + g_el.toFixed(2) + "</span> | नवीन ML साठणार: <span style='color:green;'>" + h_ml.toFixed(2) + "</span> | एकूण रजा दिवस (खर्च): <span style='color:purple;'>" + r_leave + " (" + q + ")</span></span>";
+}
 
 function importExcelToSystem() {
     let fileInput = document.getElementById('excel_file_import');
@@ -1031,7 +1043,6 @@ function addEntry() {
         isFirstEntry = false;
     }
 
-    // १. हजर अवधीनुसार नवीन साठणारी रजा व एकूण शिल्लक काढणे
     let curEL = initialValues.el || 0;
     let curML = initialValues.ml || 0;
     if (history.length > 0) {
@@ -1040,7 +1051,7 @@ function addEntry() {
     }
 
     let f_days = 0, g_el = 0, h_ml = 0;
-    if (b && b !== "---" && b !== "सरेंडर रजा" && q !== "सरेंडर रजा") {
+    if (b && b !== "---" && b !== "सरेंडर रजा") {
         let d1 = parseDMY(a), d2 = parseDMY(b);
         if (d1 && d2) {
             let tot = Math.round((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -1060,7 +1071,6 @@ function addEntry() {
     let totalAvailML = applyLimits(aa3_int + h_int + Math.floor((aa3_mod + Math.round(h_mod * 100))/30) + ((aa3_mod + Math.round(h_mod * 100))%30)/100, 120);
     let availML_days = Math.floor(totalAvailML);
 
-    // २. रजा दिवस मोजणे
     let r_diff_val = 0;
     let surrenderDays = 0;
 
@@ -1068,24 +1078,29 @@ function addEntry() {
         q = "सेवा समाप्ती (हिशोब बंद)";
         o = "---"; p = "---"; r_diff_val = 0;
     } else if(q === "सरेंडर रजा") {
-        surrenderDays = parseInt(document.getElementById('surrender_days_input').value, 10);
-        if (isNaN(surrenderDays) || surrenderDays <= 0) { 
-            alert("कृपया सरेंडर रजा दिवस टाका!"); 
+        let do1 = parseDMY(o);
+        let dp1 = parseDMY(p);
+        if (do1 && dp1 && dp1 >= do1) {
+            surrenderDays = Math.round((dp1.getTime() - do1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        } else {
+            surrenderDays = parseInt(document.getElementById('surrender_days_input').value, 10) || 0;
+        }
+
+        if (surrenderDays <= 0) { 
+            alert("कृपया गैरहजर दिनांक (O-P) योग्य टाका किंवा सरेंडर दिवस टाका!"); 
             return; 
         }
         let doubleRequired = surrenderDays * 2;
-        // शिल्लक हक्काची रजा दुप्पट दिवसांपेक्षा कमी असल्यास रजा नाकारली जाईल
         if (doubleRequired > availEL_days) {
             alert(`❌ शिल्लक हक्काची रजा अपुरी असल्यामुळे सरेंडर रजा मिळणार नाही!\n\nमागणी: ${surrenderDays} दिवस (खर्चासाठी आवश्यक: ${doubleRequired} दिवस)\nउपलब्ध शिल्लक: ${availEL_days} दिवस.`);
             return;
         }
-        r_diff_val = doubleRequired; // हक्काच्या रजेतून दुप्पट दिवस (उदा. ६२) खर्ची पडतील
+        r_diff_val = doubleRequired;
     } else {
         let do1 = parseDMY(o); let dp1 = parseDMY(p);
         if (do1 && dp1) { r_diff_val = Math.round((dp1.getTime() - do1.getTime()) / (1000 * 60 * 60 * 24)) + 1; }
     }
 
-    // ३. शिल्लक रजेनुसार समायोजन (Leave Exhaustion Logic)
     let autoLwpDays = 0;
     let spentML = 0, spentEL = 0;
 
@@ -1125,7 +1140,6 @@ function addEntry() {
         }
     }
 
-    // ४. हजर अवधीतील LWP (E) चे कालावधी
     let dutyLwpIntervals = [];
     if(e > 0) {
         let startInputs = document.querySelectorAll('.lwp-start-pick');
@@ -1133,7 +1147,6 @@ function addEntry() {
         startInputs.forEach((input, i) => { dutyLwpIntervals.push({ start: input.value, end: endInputs[i].value }); });
     }
 
-    // ५. रजेतील LWP चे कालावधी
     let leaveLwpIntervals = [];
     if (autoLwpDays > 0 && o && p && o !== "---" && p !== "---") {
         let pDate = parseDMY(p);
@@ -1142,30 +1155,6 @@ function addEntry() {
             lwpStart.setDate(lwpStart.getDate() - autoLwpDays + 1);
             leaveLwpIntervals.push({ start: formatDMY(lwpStart), end: p });
         }
-    }
-
-    // गैरहजर O-P वरून सरेंडर दिवस काढणे
-    let surrenderDays = 0;
-    if (q === "सरेंडर रजा") {
-        let do1 = parseDMY(o);
-        let dp1 = parseDMY(p);
-        if (do1 && dp1 && dp1 >= do1) {
-            surrenderDays = Math.round((dp1.getTime() - do1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-        } else {
-            surrenderDays = parseInt(document.getElementById('surrender_days_input').value, 10) || 0;
-        }
-
-        if (surrenderDays <= 0) {
-            alert("कृपया गैरहजर दिनांक (O-P) योग्य टाका किंवा सरेंडर दिवस टाका!");
-            return;
-        }
-
-        let doubleRequired = surrenderDays * 2;
-        if (doubleRequired > availEL_days) {
-            alert(`❌ शिल्लक हक्काची रजा अपुरी असल्यामुळे सरेंडर रजा मिळणार नाही!\n\nमागणी: ${surrenderDays} दिवस (खर्चासाठी आवश्यक: ${doubleRequired} दिवस)\nउपलब्ध शिल्लक: ${availEL_days} दिवस.`);
-            return;
-        }
-        r_diff_val = doubleRequired;
     }
 
     let entryObject = {
@@ -1255,19 +1244,9 @@ function recalculateAndRender() {
                 }
             }
 
-            if (item.b === "---" || item.b.trim() === "") {
-    item.f = 0;
-    item.g = 0; item.h = 0;
-} else {
-    let d1 = parseDMY(item.a); let d2 = parseDMY(item.b);
-    if (d1 && d2) {
-        let totalDaysInRange = Math.round((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-        item.f = totalDaysInRange - item.e; 
-        if(item.f < 0) item.f = 0;
-        item.g = Math.floor(item.f / 11) + (item.f % 11) / 100;
-        item.h = Math.floor(item.f / 30) + (item.f % 30) / 100;
-    }
-}
+            if (item.b === "---" || item.b.trim() === "" || item.b === "सरेंडर रजा") {
+                item.f = 0;
+                item.g = 0; item.h = 0;
             } else {
                 let d1 = parseDMY(item.a); let d2 = parseDMY(item.b);
                 if (d1 && d2) {
@@ -1387,7 +1366,6 @@ function renderTable() {
                 '<strong style="color:#d32f2f;">' + currentAutoLwp + ' दिवस</strong><br><small style="color:#b71c1c;">(' + item.leaveLwpIntervals.map(i=>i.start+" ते "+i.end).join(", ") + ')</small>' : 
                 (currentAutoLwp > 0 ? '<strong style="color:#d32f2f;">' + currentAutoLwp + ' दिवस</strong>' : '0');
 
-            // सरेंडर रजेसाठी ३१+३१=६२ असा डिस्प्ले
             let displayR = (item.q === "सरेंडर रजा" && item.surrenderDays) 
                 ? (item.surrenderDays + '+' + item.surrenderDays + '=' + item.r_diff) 
                 : item.r_diff;
@@ -1400,9 +1378,8 @@ function renderTable() {
             '<td>' + actionButtons + '</td>';
 
             if (item.q === "सरेंडर रजा") {
-    currentSurrender = item.surrenderDays || 0;
-    currentEL_spent = item.surrenderDays || 0; // सरेंडर ३१ + हक्काची ३१
-}
+                currentSurrender = item.surrenderDays || 0;
+                currentEL_spent = item.surrenderDays || 0;
             } else if (item.q === "हक्काची रजा") {
                 currentEL_spent = item.spentEL !== undefined ? item.spentEL : Math.min(item.r_diff, Math.floor(item.k_val || 0));
             } else if (item.q.includes("वैद्यकीय रजा")) {
