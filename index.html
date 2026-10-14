@@ -3,13 +3,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>महानगरपालिका रजा नोंद व सेवानिवृत्ती व्यवस्थापन प्रणाली</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="./महानगरपालिका रजा नोंद व सेवानिवृत्ती व्यवस्थापन प्रणाली_files/flatpickr.min.css">
 <style>
 body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
 .container { max-width: 1550px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 h2 { text-align: center; color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; margin-bottom: 20px; }
 .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; flex-wrap: wrap; }
-.tab-btn { padding: 12px 25px; border: none; background-color: #e0e0e0; font-size: 15px; font-weight: bold; cursor: border; border-radius: 5px; transition: 0.3s; }
+.tab-btn { padding: 12px 25px; border: none; background-color: #e0e0e0; font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 5px; transition: 0.3s; }
 .tab-btn.active { background-color: #1a73e8; color: white; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
@@ -90,7 +90,6 @@ tr:nth-child(even) { background-color: #f9f9f9; }
 </div>
 
 <div class="container" id="mainApp" style="display: block;">
-    <!-- मुख्य शीर्षक आणि युजर आयडी / लॉगआउट -->
     <div style="position: relative; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; margin-bottom: 20px;">
         <h2 style="border: none; margin: 0; padding: 0; text-align: center;">महानगरपालिका रजा नोंद व सेवानिवृत्ती व्यवस्थापन प्रणाली</h2>
         <div style="position: absolute; right: 0; top: 0; display: flex; align-items: center; gap: 10px;">
@@ -270,23 +269,23 @@ tr:nth-child(even) { background-color: #f9f9f9; }
         <br><br>
         <h3>४. प्रत्येक मॅन्युअल पानावरील एकत्रित चार्ट (Page-wise Grand Summary Chart)</h3>
         <table id="summaryChartTable">
-    <thead>
-        <tr class="summary-header">
-            <th>पान नंबर व अवधी (Page No &amp; Period)</th>
-            <th>एकूण हजर दिवस (Total F)</th>
-            <th>एकूण साठलेली EL (Total G)</th>
-            <th>एकूण साठलेली ML (Total H)</th>
-            <th>उपभोगलेली EL (Spent EL)</th>
-            <th>उपभोगलेली ML (Spent ML)</th>
-            <th style="background-color: #e65100;">सरेंडर रजा (Surrender)</th>
-            <th style="background-color: #00796b;">अतिरिक्त सेवा रजा (Bonus EL)</th>
-            <th>विशेष रजा (Special)</th>
-            <th>एकूण LWP (Total E)</th>
-            <th style="background-color: #2e7d32;">एकूण सेवा कालावधी (हजर+रजा)</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+            <thead>
+                <tr class="summary-header">
+                    <th>पान नंबर व अवधी (Page No &amp; Period)</th>
+                    <th>एकूण हजर दिवस (Total F)</th>
+                    <th>एकूण साठलेली EL (Total G)</th>
+                    <th>एकूण साठलेली ML (Total H)</th>
+                    <th>उपभोगलेली EL (Spent EL)</th>
+                    <th>उपभोगलेली ML (Spent ML)</th>
+                    <th style="background-color: #e65100;">सरेंडर रजा (Surrender)</th>
+                    <th style="background-color: #00796b;">अतिरिक्त सेवा रजा (Bonus EL)</th>
+                    <th>विशेष रजा (Special)</th>
+                    <th>एकूण LWP (Total E)</th>
+                    <th style="background-color: #2e7d32;">एकूण सेवा कालावधी (हजर+रजा)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
 
         <br><br>
         <h3>५. महिनावार बिनपगारी रजा (LWP) तपशील अहवाल</h3>
@@ -488,7 +487,7 @@ tr:nth-child(even) { background-color: #f9f9f9; }
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="./महानगरपालिका रजा नोंद व सेवानिवृत्ती व्यवस्थापन प्रणाली_files/flatpickr"></script>
 
 <script>
 let history = [];
@@ -1044,6 +1043,7 @@ function addEntry() {
         isFirstEntry = false;
     }
 
+    // १. हजर अवधीनुसार नवीन साठणारी रजा व एकूण शिल्लक काढणे
     let curEL = initialValues.el || 0;
     let curML = initialValues.ml || 0;
     if (history.length > 0) {
@@ -1072,6 +1072,7 @@ function addEntry() {
     let totalAvailML = applyLimits(aa3_int + h_int + Math.floor((aa3_mod + Math.round(h_mod * 100))/30) + ((aa3_mod + Math.round(h_mod * 100))%30)/100, 120);
     let availML_days = Math.floor(totalAvailML);
 
+    // २. रजा दिवस मोजणे
     let r_diff_val = 0;
     let surrenderDays = 0;
 
@@ -1422,23 +1423,19 @@ function renderTable() {
             }
 
             let chartRow = chartBody.insertRow();
-            let chartRow = chartBody.insertRow();
-chartRow.innerHTML = '<td>पान नंबर ' + pageNum + ' (' + pagePeriodText + ')</td>' +
-    '<td>' + pgF + '</td>' +
-    '<td>' + convertedPgG.toFixed(2) + '</td>' +
-    '<td>' + convertedPgH.toFixed(2) + '</td>' +
-    '<td>' + pgEL_spent + '</td>' +
-    '<td>' + pgML_spent + '</td>' +
-    '<td style="color:#e65100; font-weight:bold;">' + pgSurrender + '</td>' +
-    /* 👇 पानावरील अतिरिक्त रजा येथे दिसेल */
-    '<td style="color:#00796b; font-weight:bold;">' + (pgBonus > 0 ? '+' + pgBonus : '0') + '</td>' +
-    '<td>' + pgSpl_spent + '</td>' +
-    '<td style="color:#d32f2f; font-weight:bold;">' + totalPageLwp + '</td>' +
-    '<td style="font-weight:bold; background:#e8f5e9; color:#1b5e20;">' + totalPageService + ' दिवस</td>';
+            chartRow.innerHTML = '<td>पान नंबर ' + pageNum + ' (' + pagePeriodText + ')</td>' +
+                '<td>' + pgF + '</td>' +
+                '<td>' + convertedPgG.toFixed(2) + '</td>' +
+                '<td>' + convertedPgH.toFixed(2) + '</td>' +
+                '<td>' + pgEL_spent + '</td>' +
+                '<td>' + pgML_spent + '</td>' +
+                '<td style="color:#e65100; font-weight:bold;">' + pgSurrender + '</td>' +
+                '<td style="color:#00796b; font-weight:bold;">' + (pgBonus > 0 ? '+' + pgBonus : '0') + '</td>' +
+                '<td>' + pgSpl_spent + '</td>' +
+                '<td style="color:#d32f2f; font-weight:bold;">' + totalPageLwp + '</td>' +
+                '<td style="font-weight:bold; background:#e8f5e9; color:#1b5e20;">' + totalPageService + ' दिवस</td>';
 
-// पुढील पानासाठी रीसेट करताना शेवटी pgBonus = 0 करा:
-pageNum++; pgF = 0; pgE = 0; pgG = 0; pgH = 0; pgEL_spent = 0; pgML_spent = 0; pgSpl_spent = 0; pgAutoLwp = 0; pgSurrender = 0; pgBonus = 0; pageStartDate = "";
-            pageNum++; pgF = 0; pgE = 0; pgG = 0; pgH = 0; pgEL_spent = 0; pgML_spent = 0; pgSpl_spent = 0; pgAutoLwp = 0; pgSurrender = 0; pageStartDate = "";
+            pageNum++; pgF = 0; pgE = 0; pgG = 0; pgH = 0; pgEL_spent = 0; pgML_spent = 0; pgSpl_spent = 0; pgAutoLwp = 0; pgSurrender = 0; pgBonus = 0; pageStartDate = "";
         }
     });
 
@@ -1450,17 +1447,16 @@ pageNum++; pgF = 0; pgE = 0; pgG = 0; pgH = 0; pgEL_spent = 0; pgML_spent = 0; p
         let totalGrandService = grandF + grandEL_spent + grandML_spent + grandSpl_spent;
 
         gtRow.innerHTML = '<td>ग्रँड एकूण संख्या (Grand Total)</td>' +
-    '<td>' + grandF + '</td>' +
-    '<td>' + finalGrandG.toFixed(2) + '</td>' +
-    '<td>' + finalGrandH.toFixed(2) + '</td>' +
-    '<td>' + grandEL_spent + '</td>' +
-    '<td>' + grandML_spent + '</td>' +
-    '<td style="color:#e65100; font-weight:bold;">' + grandSurrender + '</td>' +
-    /* 👇 सर्व पानांची एकूण अतिरिक्त रजा येथे दिसेल */
-    '<td style="color:#00796b; font-weight:bold;">+' + grandBonus + ' दिवस</td>' +
-    '<td>' + grandSpl_spent + '</td>' +
-    '<td style="color:#b71c1c; font-weight:bold;">' + totalGrandLwp + '</td>' +
-    '<td style="font-weight:bold; background:#c8e6c9; color:#1b5e20;">' + totalGrandService + ' दिवस</td>';
+            '<td>' + grandF + '</td>' +
+            '<td>' + finalGrandG.toFixed(2) + '</td>' +
+            '<td>' + finalGrandH.toFixed(2) + '</td>' +
+            '<td>' + grandEL_spent + '</td>' +
+            '<td>' + grandML_spent + '</td>' +
+            '<td style="color:#e65100; font-weight:bold;">' + grandSurrender + '</td>' +
+            '<td style="color:#00796b; font-weight:bold;">+' + grandBonus + ' दिवस</td>' +
+            '<td>' + grandSpl_spent + '</td>' +
+            '<td style="color:#b71c1c; font-weight:bold;">' + totalGrandLwp + '</td>' +
+            '<td style="font-weight:bold; background:#c8e6c9; color:#1b5e20;">' + totalGrandService + ' दिवस</td>';
     }
     generateLeaveAndLwpReports();
 }
@@ -2497,9 +2493,9 @@ function clearFixationStatement() { calculatedStatements = []; renderStatementTa
 </script>
 
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="./महानगरपालिका रजा नोंद व सेवानिवृत्ती व्यवस्थापन प्रणाली_files/firebase-app.js.download"></script>
+<script src="./महानगरपालिका रजा नोंद व सेवानिवृत्ती व्यवस्थापन प्रणाली_files/firebase-auth.js.download"></script>
+<script src="./महानगरपालिका रजा नोंद व सेवानिवृत्ती व्यवस्थापन प्रणाली_files/firebase-firestore.js.download"></script>
 
 <script>
   const firebaseConfig = {
