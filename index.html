@@ -1149,6 +1149,7 @@ function addEntry() {
         startInputs.forEach((input, i) => { dutyLwpIntervals.push({ start: input.value, end: endInputs[i].value }); });
     }
 
+    // ५. रजेतील LWP चे कालावधी
     let leaveLwpIntervals = [];
     if (autoLwpDays > 0 && o && p && o !== "---" && p !== "---") {
         let pDate = parseDMY(p);
@@ -1157,6 +1158,29 @@ function addEntry() {
             lwpStart.setDate(lwpStart.getDate() - autoLwpDays + 1);
             leaveLwpIntervals.push({ start: formatDMY(lwpStart), end: p });
         }
+    }
+
+    // येथे फक्त surrenderDays ची किंमत तपासा ('let' पुन्हा लिहू नका):
+    if (q === "सरेंडर रजा") {
+        let do1 = parseDMY(o);
+        let dp1 = parseDMY(p);
+        if (do1 && dp1 && dp1 >= do1) {
+            surrenderDays = Math.round((dp1.getTime() - do1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        } else {
+            surrenderDays = parseInt(document.getElementById('surrender_days_input').value, 10) || 0;
+        }
+
+        if (surrenderDays <= 0) {
+            alert("कृपया गैरहजर दिनांक (O-P) योग्य टाका किंवा सरेंडर दिवस टाका!");
+            return;
+        }
+
+        let doubleRequired = surrenderDays * 2;
+        if (doubleRequired > availEL_days) {
+            alert(`❌ शिल्लक हक्काची रजा अपुरी असल्यामुळे सरेंडर रजा मिळणार नाही!\n\nमागणी: ${surrenderDays} दिवस (खर्चासाठी आवश्यक: ${doubleRequired} दिवस)\nउपलब्ध शिल्लक: ${availEL_days} दिवस.`);
+            return;
+        }
+        r_diff_val = doubleRequired;
     }
 
     let entryObject = {
@@ -1246,17 +1270,25 @@ function recalculateAndRender() {
                 }
             }
 
+            // फक्त हा एकच ब्लॉक ठेवा:
             if (item.b === "---" || item.b.trim() === "" || item.b === "सरेंडर रजा") {
                 item.f = 0;
-                item.g = 0; item.h = 0;
+                item.g = 0; 
+                item.h = 0;
             } else {
-                let d1 = parseDMY(item.a); let d2 = parseDMY(item.b);
+                let d1 = parseDMY(item.a); 
+                let d2 = parseDMY(item.b);
                 if (d1 && d2) {
                     let totalDaysInRange = Math.round((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
                     item.f = totalDaysInRange - item.e; 
                     if(item.f < 0) item.f = 0;
                     item.g = Math.floor(item.f / 11) + (item.f % 11) / 100;
                     item.h = Math.floor(item.f / 30) + (item.f % 30) / 100;
+                }
+            }
+
+            let z3_int = Math.floor(curEL), z3_mod = Math.round((curEL % 1) * 100);
+            let g_int = Math.floor(item.g), g_mod = Math.round((item.g % 1) * 100);
                 }
             }
 
@@ -1418,10 +1450,12 @@ function renderTable() {
             let totalPageService = pgF + pgEL_spent + pgML_spent + pgSpl_spent;
 
             if (pageBreaks.includes(index)) {
-                let brkRow = tbody.insertRow(); brkRow.className = "page-break-row";
+                let brkRow = tbody.insertRow(); 
+                brkRow.className = "page-break-row";
                 brkRow.innerHTML = '<td colspan="14">--- मॅन्युअल पान ' + pageNum + ' समाप्त (' + pagePeriodText + ') ---</td>';
             }
 
+            // फक्त एकदाच chartRow तयार करा:
             let chartRow = chartBody.insertRow();
             chartRow.innerHTML = '<td>पान नंबर ' + pageNum + ' (' + pagePeriodText + ')</td>' +
                 '<td>' + pgF + '</td>' +
@@ -1435,7 +1469,12 @@ function renderTable() {
                 '<td style="color:#d32f2f; font-weight:bold;">' + totalPageLwp + '</td>' +
                 '<td style="font-weight:bold; background:#e8f5e9; color:#1b5e20;">' + totalPageService + ' दिवस</td>';
 
-            pageNum++; pgF = 0; pgE = 0; pgG = 0; pgH = 0; pgEL_spent = 0; pgML_spent = 0; pgSpl_spent = 0; pgAutoLwp = 0; pgSurrender = 0; pgBonus = 0; pageStartDate = "";
+            // पुढील पानासाठी एकदाच व्हेरिएबल्स रीसेट करा:
+            pageNum++; 
+            pgF = 0; pgE = 0; pgG = 0; pgH = 0; 
+            pgEL_spent = 0; pgML_spent = 0; pgSpl_spent = 0; 
+            pgAutoLwp = 0; pgSurrender = 0; pgBonus = 0; 
+            pageStartDate = "";
         }
     });
 
